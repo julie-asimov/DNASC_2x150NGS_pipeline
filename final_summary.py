@@ -63,7 +63,7 @@ def summary_file(metadata_csv: str, output_dir: str) -> None:
        'Missing_Positions', 'Softclip_pileup', 'Homopolymer_SNPs', 'Coverage',
        'Depth', '%Mapped', 'Low_coverage_regions','Lacz_coverage', 'Backbone_Found', 'Backbone_SNPs',
        'Backbone_homopolymer_SNPs', 'Backbone_Softclip_pileup',
-       'Known_BB_SNPs', 'INDEX_ID', 'WELL_ID', 'PLATE_ID',
+       'Known_BB_SNPs', 'REQUEST_ID','INDEX_ID', 'WELL_ID', 'PLATE_ID',
        'STOCK_ID', 'PROCESS_ID', 'CONCENTRATION_NGUL', 'WELL_NUMBER', 'SOURCE','DNA_TO_ASSEMBLE', 'DNA_WELLS_TO_ASSEMBLE',
        'PLASMID_ALIAS', 'AVAILABLE', 'SEQ_CONFIRMED', 'SAMPLE_NAME',
        'Antibiotic', 'ASSEMBLY_PLATE_ID', 'ASSEMBLY_WELL_ID',
