@@ -233,8 +233,6 @@ def parse_brc_file(parse_brc_output: str, ref_fasta: str, soft_clip_bam_file: st
                 num_plus_strand=int(fields[7])  # #SNP plus strand
                 num_minus_strand=float(fields[8])  # #SNP minus strand
                 avg_basequality=float(fields[9])  # SNP base qaulity
-                 if '+' in base:
-                
                 if base == ref or vaf <= 5 or 0.01 <= avg_basequality < 30 or count <= 5:
                     continue
               # Get reads with soft clips at the SNP position
@@ -447,7 +445,6 @@ def get_missing_positions(bam_readcount_output: str, bam_location: str) -> str:
 
     return missing_position
 
-
 def find_low_coverage_regions(coverage_string, fasta_file, low_coverage_factor=0.2, min_stretch_length=6, gc_threshold=65):
     # Convert the string to a numpy array of integers
     coverage_array = np.array(list(map(int, coverage_string.split(','))))
@@ -581,7 +578,7 @@ def write_sample_output(metadata: str, output_dir: str) -> None:
             bam_LZcoverage_val = bam_coverage(bam_locationlz)
 
             #Get Backbone range
-            bb_name, ranges_plasmid, ranges_backbone=blast_backbone_index(args.backbone_db, ref_fasta, output_dir)
+            bb_name, ranges_plasmid, ranges_backbone=blast_backbone_index('/code/mydb', ref_fasta, output_dir)
             # Get missing positions for BAM file
             missing_positions_val = get_missing_positions(bam_readcount_output, bam_location)
             #Get Softclips from BAM file
@@ -623,10 +620,9 @@ if __name__ == "__main__":
 
     parser.add_argument('metadata_csv')
     parser.add_argument('output_dir')
-    parser.add_argument('backbone_db')
     args = parser.parse_args()
 
-    write_sample_output(args.metadata_csv, args.output_dir, args.backbone_db)
+    write_sample_output(args.metadata_csv, args.output_dir)
 
 
 
