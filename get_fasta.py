@@ -3,32 +3,52 @@ import os
 import argparse
 import pandas as pd
 from Bio import SeqIO
-#from functions import check_file_size
+import subprocess
+import sys
 
-def get_fasta(metadata_csv, output_dir):
+def get_fasta(metadata_csv, master_fasta, output_dir):
     print("get reference files started")
     os.makedirs(os.path.join(output_dir, "ref_fasta"), exist_ok=True)
     
-
-    # Copy allSequences.fasta from Google Cloud Storage to the specified output directory
-    catch = os.path.join(output_dir, "allSequences.fasta")
-    if not os.path.exists(catch):
-        os.system("gcloud storage cp gs://bios-sequences-prd-da03d51/allSequences.fasta {}".format(output_dir))
+   # Copy allSequences.fasta from Google Cloud Storage to the specified output directory. Requires bigquery access on VM.
+    #catch = os.path.join(output_dir, "allSequences.fasta")
+    #if not os.path.exists(catch):
+     #   try:
+      #      subprocess.run(
+       #         ["gcloud", "storage", "cp", "gs://bios-sequences-prd-da03d51/allSequences.fasta", catch],
+        #        check=True
+         #   )
+       # except subprocess.CalledProcessError as e:
+        #    print("Error: Failed to download allSequences.fasta from Google Cloud Storage.")
+         #   print(e.stderr)
+          #  sys.exit(1)
+           # return
 
     # Generate run.fa of only samples found in seq run from master fasta
     catch = os.path.join(output_dir, "ref_fasta", "run.fa")
     if not os.path.exists(catch):
+        records=[]
         with open(os.path.join(output_dir, "ref_fasta", "run.fa"), "w") as out_file:
-            for record in SeqIO.parse(output_dir+'/allSequences.fasta', "fasta"):
+            for record in SeqIO.parse(master_fasta, "fasta"):
                 if record.id in pd.read_csv(metadata_csv, usecols=['STOCK_ID'])['STOCK_ID'].unique():
-                    SeqIO.write(record, out_file, "fasta")
+                    records.append(record)
+        if len(records) == 0:
+            print("Warning: No records found for generating run.fa. Deleting the file.")
+            if os.path.exists(catch):
+                os.remove(catch)
+            sys.exit(1)
 
-        current_dir = os.getcwd()
-        # Change the current directory to the location of run.fa
-        os.chdir(os.path.join(output_dir, "ref_fasta"))
+        with open(catch, "w") as out_file:
+            SeqIO.write(records, out_file, "fasta")
 
-    # Split the multi-pIA-fasta into individual fasta for each subject found in run.fa
-        os.system("perl -ne 'if (/^>(\S+)/) { close OUT; open OUT, \">$1.fasta\" } print OUT' run.fa")
+        if os.path.getsize(catch) == 0:
+            print("Warning: run.fa is empty. Deleting the file.")
+            os.remove(catch)
+            sys.exit(1)
+
+        if not os.path.exists(catch):
+            print("Error: run.fa was not generated. Check the input data and metadata.")
+            sys.exit(1)
 
     current_dir = os.getcwd()
 
