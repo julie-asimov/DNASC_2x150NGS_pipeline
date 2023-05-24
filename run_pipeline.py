@@ -24,8 +24,8 @@ def main():
     # Create necessary output directory
     os.makedirs(args.output_dir, exist_ok=True)
     
-    # Call the necessary Python scripts
-    get_fasta(args.metadata_csv, args.output_dir)
+     # Call the necessary Python scripts
+    get_fasta(args.metadata_csv, args.master_fasta, args.output_dir)
     run_fastp_parallel(args.raw_fastq, args.output_dir)
     qc_fastp(args.output_dir)
     run_workflow( args.metadata_csv, args.output_dir)
@@ -38,6 +38,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='NGS Pipeline')
     parser.add_argument('raw_fastq', type=str, help='Path to input fastq')
     parser.add_argument('metadata_csv', type=str, help='Path to input samplesheet')
+    parser.add_argument('master_fasta', type=str, help='Path to master fasta')
     parser.add_argument('output_dir', type=str, help='Path to output file')
 
     # Parse command line arguments
