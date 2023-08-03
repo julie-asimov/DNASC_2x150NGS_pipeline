@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import argparse
 import pandas as pd
@@ -7,10 +6,11 @@ import subprocess
 import sys
 
 def get_fasta(metadata_csv, master_fasta, output_dir):
+    
     print("get reference files started")
     os.makedirs(os.path.join(output_dir, "ref_fasta"), exist_ok=True)
-    
-   # Copy allSequences.fasta from Google Cloud Storage to the specified output directory. Requires bigquery access on VM.
+
+    # Copy allSequences.fasta from Google Cloud Storage to the specified output directory. Requires bigquery access.
     #catch = os.path.join(output_dir, "allSequences.fasta")
     #if not os.path.exists(catch):
      #   try:
@@ -49,20 +49,27 @@ def get_fasta(metadata_csv, master_fasta, output_dir):
         if not os.path.exists(catch):
             print("Error: run.fa was not generated. Check the input data and metadata.")
             sys.exit(1)
+        
+        current_dir = os.getcwd()
+        # Change the current directory to the location of run.fa
+        os.chdir(os.path.join(output_dir, "ref_fasta"))
 
-    current_dir = os.getcwd()
+        # Split the multi-pIA-fasta into individual fasta for each subject found in run.fa
+        os.system("perl -ne 'if (/^>(\S+)/) { close OUT; open OUT, \">$1.fasta\" } print OUT' run.fa")
 
-    # Generate bwa-mem2 index files, samtools index file, and awk script to generate bed file for each fasta in the folder location $output_dir
-    for f in os.listdir(os.getcwd()):
-        if f.endswith(".fasta"):
-            catch = os.path.splitext(f)[0] + ".bed"
-            if not os.path.exists(os.path.join(output_dir,"ref_fasta", catch)):
-                os.system("bwa-mem2 index {} &".format(f))
-                os.system("samtools faidx {}".format(f))
-                os.system("awk 'BEGIN {{FS=\"\\t\"}}; {{print $1 FS \"0\" FS $2}}' {}.fai > {}.bed".format(f, os.path.splitext(f)[0]))
+        current_dir = os.getcwd()
 
-    # Return to the original directory
-    os.chdir(current_dir)
+        # Generate bwa-mem2 index files, samtools index file, and awk script to generate bed file for each fasta in the folder location $output_dir
+        for f in os.listdir(os.getcwd()):
+            if f.endswith(".fasta"):
+                catch_bed = os.path.splitext(f)[0] + ".bed"
+                if not os.path.exists(os.path.join(output_dir, "ref_fasta", catch_bed)):
+                    os.system("bwa-mem2 index {} &".format(f))
+                    os.system("samtools faidx {}".format(f))
+                    os.system("awk 'BEGIN {{FS=\"\\t\"}}; {{print $1 FS \"0\" FS $2}}' {}.fai > {}.bed".format(f, os.path.splitext(f)[0]))
+
+        # Return to the original directory
+        os.chdir(current_dir)
 
     print("get reference files finished")
 
@@ -70,10 +77,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("requires: (1) seq run metadata.csv (2) output directory")
 
     parser.add_argument('metadata_csv')
+    parser.add_argument('master_fasta')
     parser.add_argument('output_dir')
     args = parser.parse_args()
 
-    get_fasta(args.metadata_csv, args.output_dir)
+    get_fasta(args.metadata_csv, args.master_fasta, args.output_dir)
 
 #    for filename in os.listdir(args.output_dir):
 #        try:
