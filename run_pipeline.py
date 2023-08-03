@@ -24,7 +24,7 @@ def main():
     # Create necessary output directory
     os.makedirs(args.output_dir, exist_ok=True)
     
-     # Call the necessary Python scripts
+    # Call the necessary Python scripts
     get_fasta(args.metadata_csv, args.master_fasta, args.output_dir)
     run_fastp_parallel(args.raw_fastq, args.output_dir)
     qc_fastp(args.output_dir)
@@ -47,4 +47,3 @@ if __name__ == "__main__":
     if not os.path.isfile(args.metadata_csv):
         sys.exit('Error: Sample_sheet file not found')
     main()
-
