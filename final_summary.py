@@ -128,7 +128,7 @@ def summary_file(metadata_csv: str, output_dir: str) -> None:
     df.to_csv(os.path.join(output_dir, new_file_name), sep=',', index=False, header=True)
 
     #df_take = df[df['selected'] == 'yes']
-    df_take = df[(df['selected'] == 'yes') & (df['HISTORICAL_AVAILABLE_GLY'] == 'TRUE')]
+    df_take = df[(df['selected'] == 'yes') & (df['HISTORICAL_AVAILABLE_GLY'] == Fasle)]
     listfil = df_take['SEQ_NAME'].str.rsplit('_', 1).str.get(0).str.replace('_', '-')
     take = listfil.tolist()
 
